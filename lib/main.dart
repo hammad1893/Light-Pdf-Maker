@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -21,6 +22,8 @@ Future<void> main() async {
   // Open boxes
   await Hive.openBox<PdfModel>('pdfs');
   await Hive.openBox<SettingsModel>('settings');
+
+  await Firebase.initializeApp();
 
   runApp(const ProviderScope(child: MyApp()));
 }

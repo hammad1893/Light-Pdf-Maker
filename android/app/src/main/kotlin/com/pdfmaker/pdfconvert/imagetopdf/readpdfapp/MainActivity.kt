@@ -1,4 +1,4 @@
-package com.example.small_pdf_maker_
+package com.pdfmaker.pdfconvert.imagetopdf.readpdfapp
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -87,19 +87,19 @@ class _ImagePdfState extends ConsumerState<ImagePdf> {
       SnackbarMessage.error(context, "Please select at least one image");
       return;
     }
-    // Check storage permission before creating PDF
-    final storageGranted = await QuickPermissionUtils.checkStoragePermission(
-      context,
-    );
-    if (!storageGranted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Storage permission required to store PDF"),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
+    // // Check storage permission before creating PDF
+    // final storageGranted = await QuickPermissionUtils.checkStoragePermission(
+    //   context,
+    // );
+    // if (!storageGranted) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       content: Text("Storage permission required to store PDF"),
+    //       backgroundColor: Colors.red,
+    //     ),
+    //   );
+    //   return;
+    // }
 
     showDialog(
       context: context,
