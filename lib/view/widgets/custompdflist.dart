@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:small_pdf_maker_/constants/colors.dart';
-import 'package:small_pdf_maker_/constants/text.dart';
+import 'package:small_pdf_maker_/view/constants/colors.dart';
+import 'package:small_pdf_maker_/view/constants/text.dart';
 
 class Custompdflist extends StatelessWidget {
   final String title;

@@ -1,17 +1,16 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:small_pdf_maker_/constants/permission_utils.dart';
 import 'package:small_pdf_maker_/model/pdf_model.dart';
 import 'package:small_pdf_maker_/model/setting_model.dart';
-import 'package:small_pdf_maker_/screens/splashscreen.dart';
+import 'package:small_pdf_maker_/view/screens/splashscreen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize permissions
-  await PermissionManager().initialize();
+  // Initialize Hive
   await Hive.initFlutter();
   await Hive.openBox('appBox');
 
@@ -24,6 +23,9 @@ Future<void> main() async {
   await Hive.openBox<SettingsModel>('settings');
 
   await Firebase.initializeApp();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
 
   runApp(const ProviderScope(child: MyApp()));
 }

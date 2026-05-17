@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:small_pdf_maker_/constants/colors.dart';
-import 'package:small_pdf_maker_/constants/text.dart';
+import 'package:small_pdf_maker_/view/constants/colors.dart';
+import 'package:small_pdf_maker_/view/constants/text.dart';
 import 'package:small_pdf_maker_/model/pdf_model.dart';
-import 'package:small_pdf_maker_/screens/previewpdf.dart';
-import 'package:small_pdf_maker_/widgets/custompdflist.dart';
+import 'package:small_pdf_maker_/view/screens/previewpdf.dart';
+import 'package:small_pdf_maker_/view/widgets/custompdflist.dart';
 
 class Recentpdfsaver extends StatefulWidget {
   const Recentpdfsaver({super.key});

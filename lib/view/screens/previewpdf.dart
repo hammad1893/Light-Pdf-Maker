@@ -2,17 +2,19 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:pdfx/pdfx.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:uuid/uuid.dart';
-import 'package:small_pdf_maker_/constants/back_button_handler.dart';
-import 'package:small_pdf_maker_/widgets/customelevatedbutton.dart';
-import 'package:small_pdf_maker_/constants/colors.dart';
-import 'package:small_pdf_maker_/constants/loadingindicator.dart';
-import 'package:small_pdf_maker_/constants/snackbarmessage.dart';
-import 'package:small_pdf_maker_/constants/text.dart';
+import 'package:small_pdf_maker_/view/constants/back_button_handler.dart';
+import 'package:small_pdf_maker_/view/widgets/customelevatedbutton.dart';
+import 'package:small_pdf_maker_/view/constants/colors.dart';
+import 'package:small_pdf_maker_/view/constants/loadingindicator.dart';
+import 'package:small_pdf_maker_/view/constants/snackbarmessage.dart';
+import 'package:small_pdf_maker_/view/constants/text.dart';
 import 'package:small_pdf_maker_/model/pdf_model.dart';
-import 'package:small_pdf_maker_/provider/pdf_provider.dart';
-import 'package:small_pdf_maker_/screens/bottomnavigation.dart';
+import 'package:small_pdf_maker_/view_model/pdf_provider.dart';
+import 'package:small_pdf_maker_/view/screens/bottomnavigation.dart';
 
 class Previewpdf extends ConsumerStatefulWidget {
   final PdfModel? pdf;
@@ -25,9 +27,9 @@ class Previewpdf extends ConsumerStatefulWidget {
     this.platformFile,
     this.savePlatformFileToProvider = false,
   }) : assert(
-         pdf != null || platformFile != null,
-         'Either pdf or platformFile must be provided',
-       );
+          pdf != null || platformFile != null,
+          'Either pdf or platformFile must be provided',
+        );
 
   @override
   ConsumerState<Previewpdf> createState() => _PreviewpdfState();
@@ -98,10 +100,21 @@ class _PreviewpdfState extends ConsumerState<Previewpdf> {
 
   Future<void> _initControllerForPath(String path) async {
     try {
+      final file = File(path);
+      if (!await file.exists()) {
+        SnackbarMessage.error(context, "PDF file does not exist");
+        return;
+      }
+
+      // Dispose old controller safely
       _pdfController?.dispose();
+
+      // Open document first
+      final doc = await PdfDocument.openFile(path);
+
+      // Setup controller after document loaded
       _pdfController = PdfControllerPinch(document: PdfDocument.openFile(path));
 
-      final doc = await PdfDocument.openFile(path);
       if (mounted) {
         setState(() {
           totalPages = doc.pagesCount;
@@ -117,30 +130,29 @@ class _PreviewpdfState extends ConsumerState<Previewpdf> {
   Future<void> _deletePdf() async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder:
-          (_) => AlertDialog(
-            title: Text("Delete PDF", style: Apptext.headingtext),
-            content: Text(
-              "Are you sure you want to delete this PDF?",
-              style: Apptext.subheading2,
+      builder: (_) => AlertDialog(
+        title: Text("Delete PDF", style: Apptext.headingtext),
+        content: Text(
+          "Are you sure you want to delete this PDF?",
+          style: Apptext.subheading2,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              "Cancel",
+              style: TextStyle(color: Appcolors.subHeadingColor),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text(
-                  "Cancel",
-                  style: TextStyle(color: Appcolors.subHeadingColor),
-                ),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: Text(
-                  "Delete",
-                  style: TextStyle(color: Appcolors.buttonColor),
-                ),
-              ),
-            ],
           ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              "Delete",
+              style: TextStyle(color: Appcolors.buttonColor),
+            ),
+          ),
+        ],
+      ),
     );
 
     if (confirm != true) return;
@@ -220,7 +232,29 @@ class _PreviewpdfState extends ConsumerState<Previewpdf> {
                       ),
                     ),
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        try {
+                          if (_resolvedPdf == null) {
+                            SnackbarMessage.error(context, "PDF not found");
+                            return;
+                          }
+
+                          final file = File(_resolvedPdf!.filepath);
+
+                          if (!await file.exists()) {
+                            SnackbarMessage.error(context, "File not found");
+                            return;
+                          }
+
+                          await Share.shareXFiles(
+                            [XFile(file.path)],
+                            text: _resolvedPdf!.title,
+                          );
+                        } catch (e) {
+                          SnackbarMessage.error(context, "Share failed: $e");
+                          print("Error sharing PDF: $e");
+                        }
+                      },
                       icon: const Icon(
                         Icons.share_outlined,
                         size: 29,
@@ -230,53 +264,48 @@ class _PreviewpdfState extends ConsumerState<Previewpdf> {
                   ],
                 ),
               ),
-
               Expanded(
-                child:
-                    _isLoading
-                        ? const Center(child: JumpingDotsLoader())
-                        : Container(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 5,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child:
-                                _pdfController != null
-                                    ? SizedBox(
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                          0.7,
-                                      width: double.infinity,
-                                      child: PdfViewPinch(
-                                        controller: _pdfController!,
-                                        onPageChanged: (page) {
-                                          if (mounted) {
-                                            setState(() => currentPage = page);
-                                          }
-                                        },
-                                      ),
-                                    )
-                                    : const Center(
-                                      child: Text("Error loading PDF"),
-                                    ),
-                          ),
+                child: _isLoading
+                    ? const Center(child: JumpingDotsLoader())
+                    : Container(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
                         ),
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 5,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: _pdfController != null
+                              ? SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.7,
+                                  width: double.infinity,
+                                  child: PdfViewPinch(
+                                    controller: _pdfController!,
+                                    onPageChanged: (page) {
+                                      if (mounted) {
+                                        setState(() => currentPage = page);
+                                      }
+                                    },
+                                  ),
+                                )
+                              : const Center(
+                                  child: Text("Error loading PDF"),
+                                ),
+                        ),
+                      ),
               ),
-
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -287,10 +316,9 @@ class _PreviewpdfState extends ConsumerState<Previewpdf> {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                      color:
-                          currentPage > 1
-                              ? Appcolors.subHeadingColor
-                              : Colors.grey,
+                      color: currentPage > 1
+                          ? Appcolors.subHeadingColor
+                          : Colors.grey,
                       onPressed: currentPage > 1 ? _goToPreviousPage : null,
                     ),
                     const SizedBox(width: 10),
@@ -301,17 +329,15 @@ class _PreviewpdfState extends ConsumerState<Previewpdf> {
                     const SizedBox(width: 10),
                     IconButton(
                       icon: const Icon(Icons.arrow_forward_ios_rounded),
-                      color:
-                          currentPage < totalPages
-                              ? Appcolors.subHeadingColor
-                              : Colors.grey,
+                      color: currentPage < totalPages
+                          ? Appcolors.subHeadingColor
+                          : Colors.grey,
                       onPressed:
                           currentPage < totalPages ? _goToNextPage : null,
                     ),
                   ],
                 ),
               ),
-
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
@@ -321,21 +347,16 @@ class _PreviewpdfState extends ConsumerState<Previewpdf> {
                   height: size.height * 0.07,
                   width: size.width,
                   child: Customelevatedbutton(
-                    title: "Download PDF",
-                    onTap: () {
-                      if (_resolvedPdf != null) {
-                        ref
-                            .read(pdfListProvider.notifier)
-                            .downloadPdf(_resolvedPdf!);
-                        SnackbarMessage.success(
-                          context,
-                          "PDF downloaded successfully",
-                        );
-                      } else {
-                        SnackbarMessage.error(context, "PDF not found");
-                      }
-                    },
-                  ),
+                      title: "Download PDF",
+                      onTap: () {
+                        if (_resolvedPdf != null) {
+                          ref
+                              .read(pdfListProvider.notifier)
+                              .downloadPdf(_resolvedPdf!, context);
+                        } else {
+                          SnackbarMessage.error(context, "PDF not found");
+                        }
+                      }),
                 ),
               ),
             ],

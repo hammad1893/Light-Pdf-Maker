@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "41838394970",
-    "project_id": "pdf-maker-69b3c",
-    "storage_bucket": "pdf-maker-69b3c.firebasestorage.app"
+    "project_number": "152830572795",
+    "project_id": "pdf-maker-78e5a",
+    "storage_bucket": "pdf-maker-78e5a.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:41838394970:android:e7f582b254737192bfa263",
+        "mobilesdk_app_id": "1:152830572795:android:2fcfdb49e6314352e2d85e",
         "android_client_info": {
-          "package_name": "com.pdfmaker.pdfconvert.imagetopdf.readpdfapp"
+          "package_name": "com.pdf.maker.readpdfapp.pdfconvert.imagetopdf.converter"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCkqEPzrpB3cvDLaNfhgQYnX-TGwXrRno0"
+          "current_key": "AIzaSyCJTw_Z8aSLOrY9gT08d5UHu9HVo3gmzLI"
         }
       ],
       "services": {

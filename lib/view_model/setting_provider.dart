@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:small_pdf_maker_/model/setting_model.dart';
 
 final settingsBoxProvider = Provider<Box<SettingsModel>>((ref) {
@@ -8,32 +11,48 @@ final settingsBoxProvider = Provider<Box<SettingsModel>>((ref) {
 
 final settingsProvider =
     StateNotifierProvider<SettingsNotifier, SettingsModel?>((ref) {
-      final box = ref.watch(settingsBoxProvider);
+  final box = ref.watch(settingsBoxProvider);
 
-      if (box.isEmpty) {
-        // first time → set defaults
-        final defaultSettings = SettingsModel(
-          defaultFileName: "PDF_DOC_",
-          quality: "150 DPI ",
-          saveLocation: "/storage/emulated/0/Documents",
-        );
-        box.put('user', defaultSettings);
-        return SettingsNotifier(box, defaultSettings);
-      } else {
-        return SettingsNotifier(box, box.get('user'));
-      }
-    });
+  if (box.isEmpty) {
+    // first time → set defaults
+    return SettingsNotifier(box);
+  } else {
+    return SettingsNotifier(box, box.get('user'));
+  }
+});
 
 class SettingsNotifier extends StateNotifier<SettingsModel?> {
   final Box<SettingsModel> box;
 
-  SettingsNotifier(this.box, SettingsModel? state) : super(state);
+  SettingsNotifier(this.box, [SettingsModel? state]) : super(state) {
+    _initDefaultPath();
+  }
+
+  Future<void> _initDefaultPath() async {
+    if (state == null) {
+      Directory dir;
+      if (Platform.isAndroid) {
+        dir = await getExternalStorageDirectory() ??
+            await getApplicationDocumentsDirectory();
+      } else {
+        dir = await getApplicationDocumentsDirectory();
+      }
+
+      final defaultSettings = SettingsModel(
+        defaultFileName: "PDF_DOC_",
+        quality: "150 DPI",
+        saveLocation: dir.path,
+      );
+      box.put('user', defaultSettings);
+      state = defaultSettings;
+    }
+  }
 
   void updateFileName(String newName) {
     final updated = SettingsModel(
       defaultFileName: newName,
       quality: state?.quality ?? "150 DPI",
-      saveLocation: state?.saveLocation ?? "/storage/emulated/0/Documents",
+      saveLocation: state!.saveLocation,
     );
     box.put('user', updated);
     state = updated;
@@ -43,7 +62,7 @@ class SettingsNotifier extends StateNotifier<SettingsModel?> {
     final updated = SettingsModel(
       defaultFileName: state?.defaultFileName ?? "PDF_DOC_",
       quality: newQuality,
-      saveLocation: state?.saveLocation ?? "/storage/emulated/0/Documents",
+      saveLocation: state!.saveLocation,
     );
     box.put('user', updated);
     state = updated;

@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
-import 'package:small_pdf_maker_/constants/colors.dart';
-import 'package:small_pdf_maker_/constants/loadingindicator.dart';
-import 'package:small_pdf_maker_/constants/snackbarmessage.dart';
-import 'package:small_pdf_maker_/constants/text.dart';
+import 'package:small_pdf_maker_/view/constants/colors.dart';
+import 'package:small_pdf_maker_/view/constants/loadingindicator.dart';
+import 'package:small_pdf_maker_/view/constants/snackbarmessage.dart';
+import 'package:small_pdf_maker_/view/constants/text.dart';
 import 'package:small_pdf_maker_/model/pdf_model.dart';
-import 'package:small_pdf_maker_/provider/pdf_provider.dart';
-import 'package:small_pdf_maker_/provider/setting_provider.dart';
-import 'package:small_pdf_maker_/screens/previewpdf.dart';
-import 'package:small_pdf_maker_/widgets/customelevatedbutton.dart';
+import 'package:small_pdf_maker_/view_model/pdf_provider.dart';
+import 'package:small_pdf_maker_/view_model/setting_provider.dart';
+import 'package:small_pdf_maker_/view/screens/previewpdf.dart';
+import 'package:small_pdf_maker_/view/widgets/customelevatedbutton.dart';
 import 'package:uuid/uuid.dart';
 
 class Textpdf extends ConsumerStatefulWidget {

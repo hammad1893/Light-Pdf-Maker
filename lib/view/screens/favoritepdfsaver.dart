@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:small_pdf_maker_/constants/colors.dart';
-import 'package:small_pdf_maker_/constants/text.dart';
+import 'package:small_pdf_maker_/view/constants/colors.dart';
+import 'package:small_pdf_maker_/view/constants/text.dart';
 import 'package:small_pdf_maker_/model/pdf_model.dart';
-import 'package:small_pdf_maker_/provider/pdf_provider.dart';
-import 'package:small_pdf_maker_/screens/previewpdf.dart';
-import 'package:small_pdf_maker_/widgets/custompdflist.dart';
+import 'package:small_pdf_maker_/view_model/pdf_provider.dart';
+import 'package:small_pdf_maker_/view/screens/previewpdf.dart';
+import 'package:small_pdf_maker_/view/widgets/custompdflist.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // Add this import
 
 class Favoritepdfsaver extends ConsumerStatefulWidget {

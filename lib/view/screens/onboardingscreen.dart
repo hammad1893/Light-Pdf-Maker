@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:small_pdf_maker_/constants/colors.dart';
-import 'package:small_pdf_maker_/constants/text.dart';
-import 'package:small_pdf_maker_/screens/bottomnavigation.dart';
-import 'package:small_pdf_maker_/widgets/customelevatedbutton.dart';
+import 'package:small_pdf_maker_/view/constants/colors.dart';
+import 'package:small_pdf_maker_/view/constants/text.dart';
+import 'package:small_pdf_maker_/view/screens/bottomnavigation.dart';
+import 'package:small_pdf_maker_/view/widgets/customelevatedbutton.dart';
 
 class Onboradingscreen extends StatefulWidget {
   const Onboradingscreen({super.key});

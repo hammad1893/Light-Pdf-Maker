@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:small_pdf_maker_/constants/colors.dart';
-import 'package:small_pdf_maker_/constants/text.dart';
-import 'package:small_pdf_maker_/provider/setting_provider.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:small_pdf_maker_/view/constants/colors.dart';
+import 'package:small_pdf_maker_/view/constants/text.dart';
+import 'package:small_pdf_maker_/view_model/setting_provider.dart';
 
 class Settingscreen extends ConsumerStatefulWidget {
   const Settingscreen({super.key});
@@ -13,6 +16,27 @@ class Settingscreen extends ConsumerStatefulWidget {
 
 class _SettingscreenState extends ConsumerState<Settingscreen> {
   bool isActive = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _setDefaultSaveLocation();
+  }
+
+  Future<void> _setDefaultSaveLocation() async {
+    if (ref.read(settingsProvider)!.saveLocation.isEmpty) {
+      // Get the app's documents directory
+      final directory = await getApplicationDocumentsDirectory();
+      final defaultPath = "${directory.path}/PDFs";
+
+      // Ensure folder exists
+      final dir = Directory(defaultPath);
+      if (!dir.existsSync()) dir.createSync(recursive: true);
+
+      // Update provider
+      ref.read(settingsProvider.notifier).updateSaveLocation(defaultPath);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +71,6 @@ class _SettingscreenState extends ConsumerState<Settingscreen> {
                 children: [Text("PDF Settings", style: Apptext.subheading)],
               ),
               SizedBox(height: size.height * 0.02),
-
               Container(
                 padding: EdgeInsets.symmetric(
                   horizontal: size.width * 0.037,
@@ -71,99 +94,96 @@ class _SettingscreenState extends ConsumerState<Settingscreen> {
                       children: [
                         isActive
                             ? PopupMenuButton<String>(
-                              color: Appcolors.lightgreyColor,
-                              initialValue: settings!.quality,
-                              onSelected: (value) {
-                                ref
-                                    .read(settingsProvider.notifier)
-                                    .updateQuality(value);
-                              },
-                              itemBuilder:
-                                  (context) => const [
-                                    PopupMenuItem(
-                                      value: "Low (72 DPI)",
-                                      child: Text("Low (72 DPI)"),
-                                    ),
-                                    PopupMenuItem(
-                                      value: "Medium (150 DPI)",
-                                      child: Text("Medium (150 DPI)"),
-                                    ),
-                                    PopupMenuItem(
-                                      value: "High (300 DPI)",
-                                      child: Text("High (300 DPI)"),
-                                    ),
-                                  ],
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 10,
-                                ),
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: Appcolors.buttonColor,
-                                    width: 1.5,
+                                color: Appcolors.lightgreyColor,
+                                initialValue: settings!.quality,
+                                onSelected: (value) {
+                                  ref
+                                      .read(settingsProvider.notifier)
+                                      .updateQuality(value);
+                                },
+                                itemBuilder: (context) => const [
+                                  PopupMenuItem(
+                                    value: "Low (72 DPI)",
+                                    child: Text("Low (72 DPI)"),
                                   ),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      settings.quality,
-                                      style: Apptext.subheading2.copyWith(
-                                        color: Appcolors.buttonColor,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    const Icon(
-                                      Icons.arrow_drop_down,
-                                      size: 26,
+                                  PopupMenuItem(
+                                    value: "Medium (150 DPI)",
+                                    child: Text("Medium (150 DPI)"),
+                                  ),
+                                  PopupMenuItem(
+                                    value: "High (300 DPI)",
+                                    child: Text("High (300 DPI)"),
+                                  ),
+                                ],
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 10,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
                                       color: Appcolors.buttonColor,
+                                      width: 1.5,
                                     ),
-                                  ],
-                                ),
-                              ),
-                            )
-                            : GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  isActive = true; 
-                                });
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 10,
-                                ),
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: Appcolors.subHeadingColor,
-                                    width: 1.5,
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      "Medium (150 DPI)",
-                                      style: Apptext.subheading2.copyWith(
-                                        color: Appcolors.subHeadingColor,
-                                        fontWeight: FontWeight.w500,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        settings.quality,
+                                        style: Apptext.subheading2.copyWith(
+                                          color: Appcolors.buttonColor,
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                       ),
+                                      const Icon(
+                                        Icons.arrow_drop_down,
+                                        size: 26,
+                                        color: Appcolors.buttonColor,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            : GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    isActive = true;
+                                  });
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 10,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Appcolors.subHeadingColor,
+                                      width: 1.5,
                                     ),
-                                  ],
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        "Medium (150 DPI)",
+                                        style: Apptext.subheading2.copyWith(
+                                          color: Appcolors.subHeadingColor,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
                       ],
                     ),
                   ],
                 ),
               ),
-
               SizedBox(height: size.height * 0.02),
-
               Container(
                 height: size.height * 0.15,
                 width: size.width * 0.9,
@@ -185,35 +205,37 @@ class _SettingscreenState extends ConsumerState<Settingscreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        OutlinedButton(
-                          onPressed: () async {
-                            final newName = await _showInputDialog(
-                              context,
-                              "Default Filename",
-                              settings.defaultFileName,
-                            );
-                            if (newName != null && newName.isNotEmpty) {
-                              ref
-                                  .read(settingsProvider.notifier)
-                                  .updateFileName(newName);
-                            }
-                          },
-                          style: OutlinedButton.styleFrom(
-                            backgroundColor: Appcolors.lightgreyColor,
-                            minimumSize: const Size(80, 46),
-                            side: const BorderSide(
-                              width: 1.5,
-                              color: Appcolors.subHeadingColor,
+                        Flexible(
+                          child: OutlinedButton(
+                            onPressed: () async {
+                              final newName = await _showInputDialog(
+                                context,
+                                "Default Filename",
+                                settings.defaultFileName,
+                              );
+                              if (newName != null && newName.isNotEmpty) {
+                                ref
+                                    .read(settingsProvider.notifier)
+                                    .updateFileName(newName);
+                              }
+                            },
+                            style: OutlinedButton.styleFrom(
+                              backgroundColor: Appcolors.lightgreyColor,
+                              minimumSize: const Size(80, 46),
+                              side: const BorderSide(
+                                width: 1.5,
+                                color: Appcolors.subHeadingColor,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                             ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: Text(
-                            settings!.defaultFileName,
-                            style: Apptext.subheading2.copyWith(
-                              color: Appcolors.subHeadingColor,
-                              fontWeight: FontWeight.w500,
+                            child: Text(
+                              settings!.defaultFileName,
+                              style: Apptext.subheading2.copyWith(
+                                color: Appcolors.subHeadingColor,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                         ),
@@ -223,7 +245,6 @@ class _SettingscreenState extends ConsumerState<Settingscreen> {
                 ),
               ),
               SizedBox(height: size.height * 0.02),
-
               Container(
                 height: size.height * 0.15,
                 width: size.width * 0.9,
@@ -249,16 +270,31 @@ class _SettingscreenState extends ConsumerState<Settingscreen> {
                           width: size.width * 0.65,
                           child: OutlinedButton(
                             onPressed: () async {
-                              final newLocation = await _showInputDialog(
+                              String? newLocation = await _showInputDialog(
                                 context,
                                 "Save Location",
                                 settings.saveLocation,
                               );
+
                               if (newLocation != null &&
                                   newLocation.isNotEmpty) {
-                                ref
-                                    .read(settingsProvider.notifier)
-                                    .updateSaveLocation(newLocation);
+                                try {
+                                  final dir = Directory(newLocation);
+                                  if (!dir.existsSync()) {
+                                    dir.createSync(recursive: true);
+                                  }
+
+                                  ref
+                                      .read(settingsProvider.notifier)
+                                      .updateSaveLocation(newLocation);
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          "Cannot create folder at this location."),
+                                    ),
+                                  );
+                                }
                               }
                             },
                             style: OutlinedButton.styleFrom(
@@ -273,7 +309,7 @@ class _SettingscreenState extends ConsumerState<Settingscreen> {
                               ),
                             ),
                             child: Text(
-                              settings.saveLocation,
+                              settings.saveLocation.split('/').last,
                               style: Apptext.subheading2.copyWith(
                                 color: Appcolors.subHeadingColor,
                                 fontWeight: FontWeight.w500,
@@ -285,7 +321,7 @@ class _SettingscreenState extends ConsumerState<Settingscreen> {
                     ),
                   ],
                 ),
-              ),
+              )
             ],
           ),
         ),

@@ -1,7 +1,8 @@
 import 'dart:io';
+import 'package:file_saver/file_saver.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:small_pdf_maker_/model/pdf_model.dart';
 
 /// Box provider
@@ -73,36 +74,35 @@ class PdfNotifier extends StateNotifier<List<PdfModel>> {
     }
   }
 
-  Future<void> downloadPdf(PdfModel pdf) async {
+  Future<void> downloadPdf(PdfModel pdf, BuildContext context) async {
     try {
       final file = File(pdf.filepath);
+
       if (!await file.exists()) {
-        print("Original PDF file not found");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("PDF file not found")),
+        );
         return;
       }
 
-      // Get Downloads directory (Android only)
-      Directory? downloadsDir;
-      if (Platform.isAndroid) {
-        downloadsDir = Directory("/storage/emulated/0/Download");
-        if (!await downloadsDir.exists()) {
-          downloadsDir = await getExternalStorageDirectory();
-        }
-      } else if (Platform.isIOS) {
-        downloadsDir = await getApplicationDocumentsDirectory();
-      }
+      final bytes = await file.readAsBytes();
 
-      if (downloadsDir == null) {
-        print("Could not resolve downloads directory");
-        return;
-      }
+      final result = await FileSaver.instance.saveAs(
+        name: pdf.title.replaceAll(" ", "_"),
+        bytes: bytes,
+        mimeType: MimeType.pdf,
+        fileExtension: 'pdf',
+      );
 
-      final newPath = "${downloadsDir.path}/${pdf.title}";
-      await file.copy(newPath);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("PDF saved to Downloads")),
+      );
 
-      print("PDF saved to $newPath ✅");
+      debugPrint("PDF saved at: $result");
     } catch (e) {
-      print("Error downloading PDF: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Download failed: $e")),
+      );
     }
   }
 }

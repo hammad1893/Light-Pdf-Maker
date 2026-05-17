@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:small_pdf_maker_/constants/colors.dart';
+import 'package:small_pdf_maker_/view/constants/colors.dart';
 
 class Apptext {
   static TextStyle headingtext = TextStyle(

@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:small_pdf_maker_/constants/back_button_handler.dart';
-import 'package:small_pdf_maker_/constants/colors.dart';
-import 'package:small_pdf_maker_/constants/file_picker_utils.dart';
-import 'package:small_pdf_maker_/constants/permission_utils.dart';
-import 'package:small_pdf_maker_/constants/snackbarmessage.dart';
-import 'package:small_pdf_maker_/screens/favoritepdfsaver.dart';
-import 'package:small_pdf_maker_/screens/homescreen.dart';
-import 'package:small_pdf_maker_/screens/recentpdfsaver.dart';
+import 'package:small_pdf_maker_/view/constants/back_button_handler.dart';
+import 'package:small_pdf_maker_/view/constants/colors.dart';
+import 'package:small_pdf_maker_/view/constants/file_picker_utils.dart';
+import 'package:small_pdf_maker_/view/screens/favoritepdfsaver.dart';
+import 'package:small_pdf_maker_/view/screens/homescreen.dart';
+import 'package:small_pdf_maker_/view/screens/recentpdfsaver.dart';
 
 class MainHome extends StatefulWidget {
   const MainHome({super.key});
@@ -24,78 +22,7 @@ class _MainHomeState extends State<MainHome> {
     Favoritepdfsaver(),
   ];
 
-  // Track if we've shown permission dialog for this session
-  bool _hasShownPermissionDialog = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkEssentialPermissions();
-  }
-
-  // Check permissions when app starts (but don't block navigation)
-  Future<void> _checkEssentialPermissions() async {
-    await Future.delayed(const Duration(seconds: 1)); 
-
-    final hasAllPermissions =
-        await PermissionManager.hasAllEssentialPermissions();
-
-    if (!hasAllPermissions && !_hasShownPermissionDialog) {
-      _hasShownPermissionDialog = true;
-      _showPermissionRecommendation();
-    }
-  }
-
-  void _showPermissionRecommendation() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      showDialog(
-        context: context,
-        barrierDismissible: true,
-        builder:
-            (context) => AlertDialog(
-              title: const Text("Enable Permissions for Full Features"),
-              content: const Text(
-                "To use all features like camera, gallery access, and file management, "
-                "please grant the required permissions. You can do this now or later in settings.",
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text("Later"),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    Navigator.pop(context);
-                    await _requestPermissionsNow();
-                  },
-                  child: const Text("Enable Now"),
-                ),
-              ],
-            ),
-      );
-    });
-  }
-
-  Future<void> _requestPermissionsNow() async {
-    final results = await PermissionManager.requestAllPermissions(context);
-
-    if (results[PermissionType.storage]! && results[PermissionType.camera]!) {
-      await FilePickerUtils.openFilePicker(context);
-    }
-  }
-
   Future<void> _onFabPressed() async {
-    final hasStoragePermission =
-        await QuickPermissionUtils.checkStoragePermission(context);
-
-    if (!hasStoragePermission) {
-      SnackbarMessage.error(
-        context,
-        "Storage permission required to access files",
-      );
-      return;
-    }
-
     FilePickerUtils.openFilePicker(context);
   }
 
@@ -106,7 +33,6 @@ class _MainHomeState extends State<MainHome> {
       child: Scaffold(
         backgroundColor: Appcolors.secondaryColor,
         body: screens[_selectedIndex],
-
         bottomNavigationBar: CustomBottomNav(
           currentIndex: _selectedIndex,
           onItemTapped: (index) {
@@ -115,7 +41,6 @@ class _MainHomeState extends State<MainHome> {
             });
           },
         ),
-
         floatingActionButton: FloatingActionButton(
           backgroundColor: Appcolors.buttonColor,
           shape: const CircleBorder(),

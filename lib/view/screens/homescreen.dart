@@ -1,18 +1,17 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:small_pdf_maker_/constants/colors.dart';
-import 'package:small_pdf_maker_/constants/permission_utils.dart';
-import 'package:small_pdf_maker_/constants/snackbarmessage.dart';
-import 'package:small_pdf_maker_/constants/text.dart';
+import 'package:small_pdf_maker_/view/constants/colors.dart';
+import 'package:small_pdf_maker_/view/constants/snackbarmessage.dart';
+import 'package:small_pdf_maker_/view/constants/text.dart';
 import 'package:small_pdf_maker_/model/pdf_model.dart';
-import 'package:small_pdf_maker_/provider/pdf_provider.dart';
-import 'package:small_pdf_maker_/screens/imagepdf.dart';
-import 'package:small_pdf_maker_/screens/mergepdfscreen.dart';
-import 'package:small_pdf_maker_/screens/previewpdf.dart';
-import 'package:small_pdf_maker_/screens/settingscreen.dart';
-import 'package:small_pdf_maker_/screens/textpdf.dart';
-import 'package:small_pdf_maker_/widgets/custompdflist.dart';
+import 'package:small_pdf_maker_/view_model/pdf_provider.dart';
+import 'package:small_pdf_maker_/view/screens/imagepdf.dart';
+import 'package:small_pdf_maker_/view/screens/mergepdfscreen.dart';
+import 'package:small_pdf_maker_/view/screens/previewpdf.dart';
+import 'package:small_pdf_maker_/view/screens/settingscreen.dart';
+import 'package:small_pdf_maker_/view/screens/textpdf.dart';
+import 'package:small_pdf_maker_/view/widgets/custompdflist.dart';
 
 class Homescreen extends ConsumerStatefulWidget {
   const Homescreen({super.key});
@@ -38,11 +37,10 @@ class _HomescreenState extends ConsumerState<Homescreen> {
 
     final now = DateTime.now();
     final sorted = [...pdfs]..sort(
-      (a, b) =>
-          _sortOrder == "Ascending"
-              ? a.createdAt.compareTo(b.createdAt)
-              : b.createdAt.compareTo(a.createdAt),
-    );
+        (a, b) => _sortOrder == "Ascending"
+            ? a.createdAt.compareTo(b.createdAt)
+            : b.createdAt.compareTo(a.createdAt),
+      );
 
     for (var pdf in sorted) {
       if (isSameDate(pdf.createdAt, now)) {
@@ -56,26 +54,26 @@ class _HomescreenState extends ConsumerState<Homescreen> {
     return grouped;
   }
 
-  Future<void> _showCustomDialog(String title, String message) async {
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext ctx) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: Text(title, style: Apptext.headingtext),
-          content: Text(message, style: Apptext.bodygrey),
-          actions: <Widget>[
-            TextButton(
-              child: const Text("OK"),
-              onPressed: () => Navigator.of(ctx).pop(),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  // Future<void> _showCustomDialog(String title, String message) async {
+  //   return showDialog<void>(
+  //     context: context,
+  //     builder: (BuildContext ctx) {
+  //       return AlertDialog(
+  //         shape: RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(20),
+  //         ),
+  //         title: Text(title, style: Apptext.headingtext),
+  //         content: Text(message, style: Apptext.bodygrey),
+  //         actions: <Widget>[
+  //           TextButton(
+  //             child: const Text("OK"),
+  //             onPressed: () => Navigator.of(ctx).pop(),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +116,6 @@ class _HomescreenState extends ConsumerState<Homescreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: size.height * 0.06),
-
               GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -137,17 +134,15 @@ class _HomescreenState extends ConsumerState<Homescreen> {
                 ),
               ),
               SizedBox(height: size.height * 0.024),
-
               GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder:
-                          (_) => const ImagePdf(
-                            initialFiles: [],
-                            selectedFiles: [],
-                          ),
+                      builder: (_) => const ImagePdf(
+                        initialFiles: [],
+                        selectedFiles: [],
+                      ),
                     ),
                   );
                 },
@@ -162,37 +157,22 @@ class _HomescreenState extends ConsumerState<Homescreen> {
                 ),
               ),
               SizedBox(height: size.height * 0.024),
-
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () async {
-                  bool granted =
-                      await QuickPermissionUtils.checkStoragePermission(
-                        context,
-                      );
-
-                  if (!granted) {
-                    _showCustomDialog(
-                      "Permission Required",
-                      "Storage permission is needed to merge PDFs. Please allow it.",
-                    );
-                    return;
-                  }
-
-                  FilePickerResult? result = await FilePicker.platform
-                      .pickFiles(
-                        type: FileType.custom,
-                        allowedExtensions: ['pdf'],
-                        allowMultiple: true,
-                      );
+                  FilePickerResult? result =
+                      await FilePicker.platform.pickFiles(
+                    type: FileType.custom,
+                    allowedExtensions: ['pdf'],
+                    allowMultiple: true,
+                  );
 
                   if (result != null && result.files.isNotEmpty) {
                     Navigator.push(
-                      // ignore: use_build_context_synchronously
                       context,
                       MaterialPageRoute(
-                        builder:
-                            (_) => Mergepdfscreen(selectedFiles: result.files),
+                        builder: (_) =>
+                            Mergepdfscreen(selectedFiles: result.files),
                       ),
                     );
                   }
@@ -207,7 +187,6 @@ class _HomescreenState extends ConsumerState<Homescreen> {
                 ),
               ),
               SizedBox(height: size.height * 0.03),
-
               Row(
                 children: [
                   Text("Recents", style: Apptext.bodygrey),
@@ -223,7 +202,6 @@ class _HomescreenState extends ConsumerState<Homescreen> {
                 ],
               ),
               SizedBox(height: size.height * 0.025),
-
               if (pdfs.isEmpty)
                 Center(
                   child: Padding(
@@ -407,10 +385,9 @@ class _SortDropdownState extends State<SortDropdown> {
 
   @override
   Widget build(BuildContext context) {
-    IconData sortIcon =
-        widget.currentSort == "Ascending"
-            ? Icons.keyboard_arrow_up
-            : Icons.keyboard_arrow_down;
+    IconData sortIcon = widget.currentSort == "Ascending"
+        ? Icons.keyboard_arrow_up
+        : Icons.keyboard_arrow_down;
     return GestureDetector(
       key: _key,
       onTap: openMenu,

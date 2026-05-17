@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:small_pdf_maker_/constants/colors.dart';
+import 'package:small_pdf_maker_/view/constants/colors.dart';
 
 class Customelevatedbutton extends StatefulWidget {
   final String title;

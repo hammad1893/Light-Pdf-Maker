@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:small_pdf_maker_/constants/colors.dart';
-import 'package:small_pdf_maker_/screens/bottomnavigation.dart';
-import 'package:small_pdf_maker_/screens/onboardingscreen.dart';
+import 'package:small_pdf_maker_/view/constants/colors.dart';
+import 'package:small_pdf_maker_/view/screens/bottomnavigation.dart';
+import 'package:small_pdf_maker_/view/screens/onboardingscreen.dart';
 
 class Splashscreen extends StatefulWidget {
   const Splashscreen({super.key});
@@ -23,7 +23,7 @@ class _SplashscreenState extends State<Splashscreen> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const Onboradingscreen()),
-      (route) => false, 
+      (route) => false,
     );
   }
 
@@ -31,7 +31,7 @@ class _SplashscreenState extends State<Splashscreen> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const MainHome()),
-      (route) => false, 
+      (route) => false,
     );
   }
 
@@ -62,7 +62,8 @@ class _SplashscreenState extends State<Splashscreen> {
             child: Image.asset(
               "assets/images/appIcon.png",
               height: size.height * 0.22,
-              width: size.width * 0.33,
+              width: size.width * 0.4,
+              // fit: BoxFit.cover,
             ),
           ),
           const SizedBox(height: 20),

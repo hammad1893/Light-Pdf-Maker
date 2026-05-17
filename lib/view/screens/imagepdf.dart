@@ -1,4 +1,3 @@
-
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -7,16 +6,15 @@ import 'package:image_picker/image_picker.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
-import 'package:small_pdf_maker_/constants/colors.dart';
-import 'package:small_pdf_maker_/constants/loadingindicator.dart';
-import 'package:small_pdf_maker_/constants/snackbarmessage.dart';
-import 'package:small_pdf_maker_/constants/text.dart';
-import 'package:small_pdf_maker_/provider/setting_provider.dart';
-import 'package:small_pdf_maker_/screens/previewpdf.dart';
-import 'package:small_pdf_maker_/widgets/customelevatedbutton.dart';
+import 'package:small_pdf_maker_/view/constants/colors.dart';
+import 'package:small_pdf_maker_/view/constants/loadingindicator.dart';
+import 'package:small_pdf_maker_/view/constants/snackbarmessage.dart';
+import 'package:small_pdf_maker_/view/constants/text.dart';
+import 'package:small_pdf_maker_/view_model/setting_provider.dart';
+import 'package:small_pdf_maker_/view/screens/previewpdf.dart';
+import 'package:small_pdf_maker_/view/widgets/customelevatedbutton.dart';
 import 'package:small_pdf_maker_/model/pdf_model.dart';
-import 'package:small_pdf_maker_/provider/pdf_provider.dart';
-import 'package:small_pdf_maker_/constants/permission_utils.dart'; 
+import 'package:small_pdf_maker_/view_model/pdf_provider.dart';
 import 'package:uuid/uuid.dart';
 
 class ImagePdf extends ConsumerStatefulWidget {
@@ -43,20 +41,13 @@ class _ImagePdfState extends ConsumerState<ImagePdf> {
   void initState() {
     super.initState();
     // take initial files from FAB
-    imageList =
-        widget.selectedFiles
-            .map((f) => File(f.path!))
-            .where((file) => file.existsSync())
-            .toList();
+    imageList = widget.selectedFiles
+        .map((f) => File(f.path!))
+        .where((file) => file.existsSync())
+        .toList();
   }
 
   Future<void> pickImagesFromGallery() async {
-    final granted = await QuickPermissionUtils.checkGalleryPermission(context);
-    if (!granted) {
-      SnackbarMessage.error(context, "Gallery permission denied");
-      return;
-    }
-
     final List<XFile> pickedFiles = await _picker.pickMultiImage();
     if (pickedFiles.isNotEmpty) {
       setState(() {
@@ -66,19 +57,18 @@ class _ImagePdfState extends ConsumerState<ImagePdf> {
   }
 
   Future<void> pickImageFromCamera() async {
-    final granted = await QuickPermissionUtils.checkCameraPermission(context);
-    if (!granted) {
-      SnackbarMessage.error(context, "Camera permission denied");
-      return;
-    }
+    try {
+      final XFile? pickedFile = await _picker.pickImage(
+        source: ImageSource.camera,
+      );
 
-    final XFile? pickedFile = await _picker.pickImage(
-      source: ImageSource.camera,
-    );
-    if (pickedFile != null) {
-      setState(() {
-        imageList.add(File(pickedFile.path));
-      });
+      if (pickedFile != null) {
+        setState(() {
+          imageList.add(File(pickedFile.path));
+        });
+      }
+    } catch (e) {
+      SnackbarMessage.error(context, "Camera access failed");
     }
   }
 
@@ -87,19 +77,6 @@ class _ImagePdfState extends ConsumerState<ImagePdf> {
       SnackbarMessage.error(context, "Please select at least one image");
       return;
     }
-    // // Check storage permission before creating PDF
-    // final storageGranted = await QuickPermissionUtils.checkStoragePermission(
-    //   context,
-    // );
-    // if (!storageGranted) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(
-    //       content: Text("Storage permission required to store PDF"),
-    //       backgroundColor: Colors.red,
-    //     ),
-    //   );
-    //   return;
-    // }
 
     showDialog(
       context: context,
@@ -130,8 +107,7 @@ class _ImagePdfState extends ConsumerState<ImagePdf> {
       }
 
       final settings = ref.read(settingsProvider);
-      final baseDirPath =
-          settings?.saveLocation ??
+      final baseDirPath = settings?.saveLocation ??
           (await getApplicationDocumentsDirectory()).path;
       final dir = Directory(baseDirPath);
       if (!dir.existsSync()) await dir.create(recursive: true);
@@ -158,7 +134,7 @@ class _ImagePdfState extends ConsumerState<ImagePdf> {
 
       ref.read(pdfListProvider.notifier).addPdf(newPdf);
 
-      if (mounted) Navigator.pop(context); 
+      if (mounted) Navigator.pop(context);
       Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => Previewpdf(pdf: newPdf)),
@@ -194,7 +170,6 @@ class _ImagePdfState extends ConsumerState<ImagePdf> {
               ],
             ),
             SizedBox(height: size.height * 0.05),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -265,7 +240,6 @@ class _ImagePdfState extends ConsumerState<ImagePdf> {
               ],
             ),
             SizedBox(height: size.height * 0.03),
-
             Row(
               children: [
                 Text(
@@ -319,7 +293,6 @@ class _ImagePdfState extends ConsumerState<ImagePdf> {
               ),
             ),
             SizedBox(height: size.height * 0.05),
-
             Customelevatedbutton(
               title: "Create PDF (${imageList.length})",
               onTap: createPdf,
@@ -332,41 +305,41 @@ class _ImagePdfState extends ConsumerState<ImagePdf> {
   }
 
   Widget _badge(String text) => Positioned(
-    top: 10,
-    left: 10,
-    child: Container(
-      height: 20,
-      width: 20,
-      decoration: BoxDecoration(
-        color: Appcolors.buttonColor,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
+        top: 10,
+        left: 10,
+        child: Container(
+          height: 20,
+          width: 20,
+          decoration: BoxDecoration(
+            color: Appcolors.buttonColor,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            text,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
         ),
-      ),
-    ),
-  );
+      );
 
   Widget _deleteBtn(VoidCallback onTap) => Positioned(
-    top: 10,
-    right: 10,
-    child: GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 20,
-        width: 20,
-        decoration: const BoxDecoration(
-          color: Color(0xffFF4D4D),
-          shape: BoxShape.circle,
+        top: 10,
+        right: 10,
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            height: 20,
+            width: 20,
+            decoration: const BoxDecoration(
+              color: Color(0xffFF4D4D),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.close, size: 14, color: Colors.white),
+          ),
         ),
-        child: const Icon(Icons.close, size: 14, color: Colors.white),
-      ),
-    ),
-  );
+      );
 }
